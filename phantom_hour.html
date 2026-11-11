@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#22222a">
+<title>PHANTOM HOUR - a pocket ghost mystery</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#1c1c22;overflow:hidden;touch-action:none;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;
+  font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+body{display:flex;align-items:center;justify-content:center}
+#shell{position:relative;width:min(100vw,470px);height:min(100vh,880px);height:min(100dvh,880px);
+  background:linear-gradient(160deg,#d9d4c7,#bdb8aa);display:flex;flex-direction:column;align-items:center;
+  padding:max(14px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom));gap:6px}
+@media (min-width:480px) and (min-height:600px){#shell{border-radius:18px 18px 64px 18px;box-shadow:0 10px 40px #000a, inset 0 -6px 0 #0002}}
+#screencol{display:flex;flex-direction:column;align-items:center;gap:4px}
+#bezel{background:#4b4e5e;border-radius:10px 10px 34px 10px;padding:14px 20px 18px;box-shadow:inset 0 2px 6px #0008}
+#lcd{display:block;image-rendering:pixelated;image-rendering:crisp-edges;background:#e0f8d0;width:320px;height:288px}
+#brand{font-weight:800;font-style:italic;letter-spacing:.18em;color:#3b3f7a;font-size:13px}
+#brand small{font-weight:600;font-style:normal;letter-spacing:.05em;color:#6b6f86;font-size:9px;margin-left:6px}
+#pad{position:relative;flex:1;width:100%;max-height:330px;min-height:190px}
+#dpad{position:absolute;left:5%;top:8%;width:142px;height:142px;touch-action:none}
+#dpad .bar{position:absolute;background:#2a2b33;border-radius:7px;box-shadow:0 3px 0 #111}
+#dpad .h{left:0;right:0;top:34%;height:32%}
+#dpad .v{top:0;bottom:0;left:34%;width:32%}
+#dpad .hub{position:absolute;left:38%;top:38%;width:24%;height:24%;border-radius:50%;background:#1d1e24}
+#dpad .arw{position:absolute;color:#5a5c68;font-size:13px;pointer-events:none}
+#dpad .au{left:50%;top:6%;transform:translateX(-50%)}#dpad .ad{left:50%;bottom:6%;transform:translateX(-50%)}
+#dpad .al{left:7%;top:50%;transform:translateY(-50%)}#dpad .ar{right:7%;top:50%;transform:translateY(-50%)}
+#dpad.up .v{background:linear-gradient(#3c3d48 0 40%,#2a2b33 40%)}#dpad.down .v{background:linear-gradient(#2a2b33 0 60%,#3c3d48 60%)}
+#dpad.left .h{background:linear-gradient(90deg,#3c3d48 0 40%,#2a2b33 40%)}#dpad.right .h{background:linear-gradient(90deg,#2a2b33 0 60%,#3c3d48 60%)}
+#ab{position:absolute;right:4%;top:6%;width:158px;height:130px;transform:rotate(-22deg)}
+.round{position:absolute;width:64px;height:64px;border-radius:50%;background:#8d1f4f;box-shadow:0 4px 0 #4f0f2b;
+  color:#f3c6d8;font-weight:800;font-size:20px;display:flex;align-items:center;justify-content:center;touch-action:none}
+.round.on,.pill.on{transform:translateY(3px);box-shadow:0 1px 0 #111}
+#btnB{left:4px;top:52px}#btnA{right:4px;top:14px}
+#ss{position:absolute;left:0;right:0;bottom:6%;display:flex;justify-content:center;gap:34px}
+.pillwrap{display:flex;flex-direction:column;align-items:center;gap:5px;transform:rotate(-22deg);font-size:10px;font-weight:700;letter-spacing:.1em;color:#3b3f7a}
+.pill{width:58px;height:18px;border-radius:9px;background:#7d7f8c;box-shadow:0 3px 0 #4a4b55;touch-action:none}
+#keys{position:absolute;left:0;right:0;bottom:2px;text-align:center;font-size:10px;color:#77746a;display:none}
+@media (hover:hover) and (pointer:fine){#keys{display:block}}
+@media (max-width:430px){#shell{padding-left:6px;padding-right:6px}#bezel{padding:10px 10px 14px}}
+/* phone held sideways: d-pad left, screen centre, buttons right */
+@media (orientation:landscape) and (max-height:520px){
+  #shell{width:100vw;height:100vh;height:100dvh;flex-direction:row;justify-content:center;border-radius:0;
+    padding:6px max(10px,env(safe-area-inset-right)) 6px max(10px,env(safe-area-inset-left))}
+  #pad{position:static;flex:none;width:0;min-height:0}
+  #brand{display:none}
+  #bezel{padding:8px 12px 10px}
+  #dpad{left:max(18px,env(safe-area-inset-left));top:50%;transform:translateY(-62%)}
+  #ab{right:max(10px,env(safe-area-inset-right));top:50%;transform:translateY(-70%) rotate(-22deg)}
+  #ss{bottom:8px;justify-content:space-between;padding:0 44px}
+  #keys{display:none}
+}
+</style>
+</head>
+<body>
+<div id="shell">
+  <div id="screencol">
+    <div id="bezel"><canvas id="lcd" width="160" height="144"></canvas></div>
+    <div id="brand">PHANTOM HOUR<small>POCKET MYSTERY</small></div>
+  </div>
+  <div id="pad">
+    <div id="dpad"><div class="bar h"></div><div class="bar v"></div><div class="hub"></div>
+      <span class="arw au">&#9650;</span><span class="arw ad">&#9660;</span><span class="arw al">&#9664;</span><span class="arw ar">&#9654;</span></div>
+    <div id="ab"><div class="round" id="btnB" data-btn="b">B</div><div class="round" id="btnA" data-btn="a">A</div></div>
+    <div id="ss">
+      <div class="pillwrap"><div class="pill" data-btn="select"></div>SELECT</div>
+      <div class="pillwrap"><div class="pill" data-btn="start"></div>START</div>
+    </div>
+    <div id="keys">Keyboard: arrows = D-pad &middot; Z = A &middot; X = B &middot; Enter = Start &middot; Shift = Select</div>
+  </div>
+</div>
+<script>
+
+</script>
+<script>
+
+</script>
+<script>
+(() => {
+'use strict';
+// =====================================================================================
+// LOOMFALL - pocket tactics. Single-file engine: 160x144, 4 shades, D-pad + A/B/Start/Select.
+// =====================================================================================
+const W = 160, H = 144, TS = 16;
+const cv = document.getElementById('lcd');
+const cx = cv.getContext('2d');
+cx.imageSmoothingEnabled = false;
+
+const PALS = [
+  ['#e0f8d0', '#88c070', '#346856', '#081820'],   // classic green
+  ['#f8ecd8', '#d8a868', '#885838', '#2a1810'],   // sepia
+  ['#fbe9f0', '#e6a0c0', '#7c5aa6', '#221a3c'],   // sakura
+  ['#eeeeee', '#aaaaaa', '#606060', '#121212'],   // grey
+];
+let palIdx = 0, C = PALS[0];
+
+// ------------------------------------------------------------------ storage (safe in sandboxes)
+const mem = {};                                   // in-memory fallback when the host blocks localStorage
+const store = {
+  get(k) { try { const v = JSON.parse(localStorage.getItem(k)); if (v !== null) return v; } catch (e) {} return (k in mem) ? JSON.parse(mem[k]) : null; },
+  set(k, v) { mem[k] = JSON.stringify(v); try { localStorage.setItem(k, mem[k]); } catch (e) {} },
+};
+
+// ------------------------------------------------------------------ font (3x5)
+const FONT = {};
+(() => {
+  const d = {
+    A: '.#.#.#####.##.#', B: '##.#.###.#.###.', C: '.###..#..#...##', D: '##.#.##.##.###.', E: '####..##.#..###',
+    F: '####..##.#..#..', G: '.###..#.##.#.##', H: '#.##.#####.##.#', I: '###.#..#..#.###', J: '..#..#..##.#.#.',
+    K: '#.##.###.#.##.#', L: '#..#..#..#..###', M: '#.#######.##.#', N: '#.############.#', O: '.#.#.##.##.#.#.',
+    P: '##.#.###.#..#..', Q: '.#.#.##.####.##', R: '##.#.###.#.##.#', S: '.###...#...###.', T: '###.#..#..#..#.',
+    U: '#.##.##.##.####', V: '#.##.##.##.#.#.', W: '#.##.########.#', X: '#.##.#.#.#.##.#', Y: '#.##.#.#..#..#.',
+    Z: '###..#.#.#..###', 0: '####.##.##.####', 1: '.#.##..#..#.###', 2: '##...#.#.#..###', 3: '##...#.#...###.',
+    4: '#.##.####..#..#', 5: '####..##...###.', 6: '.###..####.####', 7: '###..#.#..#..#.', 8: '####.#####.####',
+    9: '####.####..###.', '.': '.............#.', ',': '..........#.#..', '!': '.#..#..#.....#.', '?': '##...#.#.....#.',
+    "'": '.#..#..........', '-': '......###......', ':': '....#.....#....', '/': '..#..#.#.#..#..', '+': '....#.###.#....',
+    '%': '#.#..#.#.#..#.#', '(': '.#.#..#..#...#.', ')': '.#...#..#..#.#.', '>': '#...#...#.#.#..', '<': '..#.#.#...#...#',
+    '=': '...###...###...', '*': '...#.#.#.#.#...',
+  };
+  d['0'] = '.#.#.##.##.#.#.'; d.O = '####.##.##.####'; d.D = '##.#.##.##.###.';
+  for (const k in d) FONT[k] = { w: 3, b: d[k].padEnd(15, '.') };
+  FONT.M = { w: 5, b: '#...###.###.#.##...##...#' };
+  FONT.W = { w: 5, b: '#...##...##.#.###.###...#' };
+  FONT.N = { w: 4, b: '#..###.##.###..##..#' };
+  FONT[' '] = { w: 2, b: '' };
+})();
+const gw = (ch) => (FONT[ch] ? FONT[ch].w : 3) + 1;
+function txt(s, x, y, c = 3, sc = 1) {
+  s = String(s).toUpperCase();
+  cx.fillStyle = C[c];
+  let px = x;
+  for (const ch of s) {
+    const g = FONT[ch];
+    if (g) for (let i = 0; i < g.b.length; i++) if (g.b[i] === '#') cx.fillRect(px + (i % g.w) * sc, y + ((i / g.w) | 0) * sc, sc, sc);
+    px += gw(ch) * sc;
+  }
+}
+const tw = (s, sc = 1) => { let n = 0; for (const ch of String(s).toUpperCase()) n += gw(ch); return Math.max(0, n - 1) * sc; };
+const txtC = (s, y, c = 3, sc = 1) => txt(s, Math.round((W - tw(s, sc)) / 2), y, c, sc);
+const txtR = (s, xr, y, c = 3, sc = 1) => txt(s, xr - tw(s, sc), y, c, sc);
+function wrap(s, px, sc = 1) {
+  const out = []; let line = '';
+  for (const w of String(s).split(' ')) {
+    if (tw((line + ' ' + w).trim(), sc) > px) { if (line) out.push(line); line = w; }
+    else line = (line + ' ' + w).trim();
+  }
+  if (line) out.push(line);
+  return out;
+}
+function box(x, y, w, h, fill = 0, border = 3) {
+  cx.fillStyle = C[border]; cx.fillRect(x, y, w, h);
+  cx.fillStyle = C[fill]; cx.fillRect(x + 1, y + 1, w - 2, h - 2);
+  cx.fillStyle = C[border];
+  cx.fillRect(x, y, 1, 1); // keep corners square (retro)
+}
+function rect(x, y, w, h, c) { cx.fillStyle = C[c]; cx.fillRect(x, y, w, h); }
+
+// ------------------------------------------------------------------ audio
+let AC = null, soundOn = true;
+function initAudio() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { AC = null; } }
+  if (AC && AC.state === 'suspended') AC.resume().catch(() => {});
+}
+function tone(f, d, type = 'square', v = 0.05, t0 = 0, slide = 0) {
+  if (!AC || !soundOn) return;
+  try {
+    const t = AC.currentTime + t0, o = AC.createOscillator(), g = AC.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, f + slide), t + d);
+    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + d + 0.03);
+  } catch (e) {}
+}
+function noise(d, v = 0.07) {
+  if (!AC || !soundOn) return;
+  try {
+    const n = Math.floor(AC.sampleRate * d), b = AC.createBuffer(1, n, AC.sampleRate), ch = b.getChannelData(0);
+    for (let i = 0; i < n; i++) ch[i] = (Math.random() * 2 - 1) * (1 - i / n);
+    const s = AC.createBufferSource(), g = AC.createGain(); g.gain.value = v;
+    s.buffer = b; s.connect(g); g.connect(AC.destination); s.start();
+  } catch (e) {}
+}
+const SFX = {
+  move: () => tone(700, .03, 'square', .025),
+  ok: () => { tone(880, .05); tone(1320, .07, 'square', .04, .05); },
+  back: () => tone(330, .07, 'square', .04),
+  err: () => tone(150, .12, 'square', .05),
+  step: () => tone(200, .025, 'square', .02),
+  hit: () => { noise(.12); tone(160, .12, 'square', .06, 0, -90); },
+  crit: () => { noise(.22, .1); tone(900, .08, 'square', .06); tone(120, .2, 'square', .07, .06, -70); },
+  miss: () => tone(1300, .07, 'triangle', .04, 0, -800),
+  heal: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, .09, 'triangle', .06, i * .07)),
+  lvl: () => [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, .1, 'square', .05, i * .08)),
+  die: () => tone(400, .35, 'square', .06, 0, -340),
+  win: () => [523, 523, 523, 698, 880, 784, 1047].forEach((f, i) => tone(f, .14, 'square', .05, i * .12)),
+  lose: () => [392, 370, 349, 262].forEach((f, i) => tone(f, .25, 'triangle', .07, i * .22)),
+};
+const TRACKS = {
+  title: { step: .24, lead: [69, 0, 72, 76, 74, 0, 72, 0, 69, 0, 67, 69, 64, 0, 0, 0, 65, 0, 69, 72, 71, 0, 69, 0, 68, 0, 71, 74, 76, 0, 0, 0], bass: [45, 45, 45, 40, 41, 41, 40, 40] },
+  player: { step: .2, lead: [72, 76, 79, 76, 77, 76, 74, 72, 74, 77, 81, 77, 79, 77, 76, 74, 72, 76, 79, 84, 83, 79, 76, 79, 81, 79, 77, 74, 76, 0, 72, 0], bass: [48, 53, 50, 55, 48, 52, 53, 55] },
+  enemy: { step: .2, lead: [57, 0, 60, 57, 64, 0, 63, 0, 57, 0, 60, 57, 65, 0, 64, 0, 55, 0, 58, 55, 62, 0, 61, 0, 57, 60, 64, 69, 68, 0, 64, 0], bass: [45, 45, 45, 45, 43, 43, 45, 40] },
+};
+let mus = null;
+const midi = (n) => 440 * Math.pow(2, (n - 69) / 12);
+function music(name) { if (mus && mus.name === name) return; mus = name ? { name, i: 0, next: 0 } : null; }
+setInterval(() => {
+  if (!AC || !soundOn || !mus || AC.state !== 'running') return;
+  const T = TRACKS[mus.name], now = AC.currentTime;
+  if (mus.next < now) mus.next = now + 0.05;
+  while (mus.next < now + 0.3) {
+    const i = mus.i % T.lead.length, n = T.lead[i];
+    if (n) tone(midi(n), T.step * .9, 'square', .02, mus.next - now);
+    if (i % 4 === 0) { const b = T.bass[(i / 4) % T.bass.length]; if (b) tone(midi(b), T.step * 3.6, 'triangle', .045, mus.next - now); }
+    mus.next += T.step; mus.i++;
+  }
+}, 100);
+document.addEventListener('visibilitychange', () => { if (AC) { if (document.hidden) AC.suspend(); else AC.resume(); } });
+
+// ------------------------------------------------------------------ input
+const held = {}, heldT = {};
+const inputQ = [];
+let btnWait = null;
+function press(b) { initAudio(); inputQ.push(b); }
+function setHeld(b, on) {
+  if (on && !held[b]) { held[b] = true; heldT[b] = 0; press(b); if (navigator.vibrate) { try { navigator.vibrate(6); } catch (e) {} } }
+  else if (!on) held[b] = false;
+}
+const KEYMAP = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', z: 'a', Z: 'a', x: 'b', X: 'b', ' ': 'a',
+  Enter: 'start', Shift: 'select', Backspace: 'b', w: 'up', s: 'down', a: 'left', d: 'right', W: 'up', S: 'down', A: 'left', D: 'right',
+  j: 'a', J: 'a', k: 'b', K: 'b', Escape: 'start', Tab: 'select' };
+addEventListener('keydown', (e) => { const b = KEYMAP[e.key]; if (!b) return; e.preventDefault(); if (!e.repeat) setHeld(b, true); });
+addEventListener('keyup', (e) => { const b = KEYMAP[e.key]; if (b) setHeld(b, false); });
+addEventListener('blur', () => { for (const k in held) held[k] = false; });
+document.addEventListener('contextmenu', (e) => e.preventDefault());
+document.querySelectorAll('[data-btn]').forEach((el) => {
+  const b = el.dataset.btn;
+  const down = (e) => { e.preventDefault(); el.classList.add('on'); try { el.setPointerCapture(e.pointerId); } catch (x) {} setHeld(b, true); };
+  const up = (e) => { e.preventDefault(); el.classList.remove('on'); setHeld(b, false); };
+  el.addEventListener('pointerdown', down); el.addEventListener('pointerup', up);
+  el.addEventListener('pointercancel', up); el.addEventListener('lostpointercapture', up);
+});
+(() => { // D-pad: one touch area, slide your thumb between directions
+  const dp = document.getElementById('dpad'); let cur = null;
+  const dirAt = (e) => {
+    const r = dp.getBoundingClientRect(), dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+    if (Math.hypot(dx, dy) < r.width * 0.1) return null;
+    return Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'up' : 'down');
+  };
+  const set = (d) => { if (d === cur) return; if (cur) { setHeld(cur, false); dp.classList.remove(cur); } cur = d; if (d) { setHeld(d, true); dp.classList.add(d); } };
+  dp.addEventListener('pointerdown', (e) => { e.preventDefault(); try { dp.setPointerCapture(e.pointerId); } catch (x) {} set(dirAt(e)); });
+  dp.addEventListener('pointermove', (e) => { if (cur !== null || e.buttons) { if (e.pressure > 0 || e.buttons) set(dirAt(e)); } });
+  const end = (e) => { e.preventDefault(); set(null); };
+  dp.addEventListener('pointerup', end); dp.addEventListener('pointercancel', end); dp.addEventListener('lostpointercapture', end);
+})();
+function fit() {
+  const shell = document.getElementById('shell').getBoundingClientRect();
+  const land = innerWidth > innerHeight && innerHeight <= 520;
+  let aw, ah;
+  if (land) { aw = shell.width - 2 * 185 - 30; ah = shell.height - 34; }
+  else { aw = shell.width - (shell.width < 430 ? 34 : 62); ah = shell.height * 0.52 - 40; }
+  const dpr = window.devicePixelRatio || 1;
+  let s = Math.min(aw / W, ah / H);
+  s = Math.max(1, Math.floor(s * dpr) / dpr);
+  cv.style.width = (W * s) + 'px'; cv.style.height = (H * s) + 'px';
+}
+addEventListener('resize', fit); addEventListener('orientationchange', () => setTimeout(fit, 200));
+
+// ------------------------------------------------------------------ timing helpers
+let frame = 0;
+const timers = [];
+const wait = (n) => new Promise((r) => timers.push({ t: frame + n, r }));
+const waitBtn = (btns = ['a']) => new Promise((r) => { btnWait = { btns, r }; });
+// wait for a button, but give up after n frames (keeps things moving)
+function waitBtnOr(n, btns = ['a', 'b']) {
+  return new Promise((r) => { let done = false; btnWait = { btns, r: (b) => { if (!done) { done = true; r(b); } } };
+    timers.push({ t: frame + n, r: () => { if (!done) { done = true; if (btnWait && btnWait.btns === btns) btnWait = null; r(null); } } }); });
+}
+const rnd = (n) => Math.floor(Math.random() * n);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+// =====================================================================================
+// PHANTOM HOUR - possess objects, stop time, change fate. D-pad + A/B/Start/Select only.
+// =====================================================================================
+const REACH = 40;
+const LEVELS = [
+  { name: 'CASE 1: THE SCRAPYARD',
+    intro: ['YOU ARE A GHOST.', 'YOU DO NOT KNOW WHY.', 'A STRANGER CREEPS TOWARD MIRA, THE NIGHT GUARD.', 'IN MOMENTS SHE WILL BE GONE... UNLESS YOU CHANGE HER FATE.'],
+    hints: ['B STOPS TIME. HOP BETWEEN CORES WITH THE D-PAD.', 'ROLL THE CART TO GET CLOSER TO THE LADDER.', 'EXTEND THE LADDER TO REACH THE CRANE.', 'DROP THE CRATE WHEN THE STRANGER IS RIGHT UNDER IT.'],
+    outro: ['THE CRATE CRASHES DOWN. THE STRANGER IS OUT COLD.', 'MIRA: WHO... WHO DID THAT?', 'A NEW FATE. BUT WHO SENT HIM?'],
+    objs: [ { id: 'can', name: 'TRASH CAN', x: 24, y: 116, trick: 'RATTLE' }, { id: 'cart', name: 'CART', x: 58, y: 118, trick: 'ROLL' },
+            { id: 'ladder', name: 'LADDER', x: 88, y: 82, trick: 'EXTEND' }, { id: 'hook', name: 'CRANE HOOK', x: 104, y: 30, trick: 'DROP' } ],
+    init(S) { S.hx = -12; S.pause = 0; S.cy = 30; S.fall = 0; S.rattled = 0; S.msg = ''; },
+    trick(S, o) {
+      if (o.id === 'can') { if (S.rattled) return 'THE CAN IS QUIET NOW.'; S.rattled = 1; S.pause = 3; return 'CLANG! THE STRANGER FREEZES.'; }
+      if (o.id === 'cart') { if (o.done) return 'IT HAS ROLLED AS FAR AS IT GOES.'; o.done = 1; o.tx = 84; return 'THE CART ROLLS AWAY.'; }
+      if (o.id === 'ladder') { if (o.done) return 'FULLY EXTENDED.'; o.done = 1; o.ty = 50; return 'THE LADDER SHOOTS UP!'; }
+      if (o.id === 'hook') { if (S.fall) return 'NOTHING LEFT TO DROP.'; S.fall = 1; return 'THE HOOK LETS GO!'; }
+    },
+    update(S, dt) {
+      if (S.pause > 0) S.pause -= dt; else if (!S.ko) S.hx += 7 * dt;
+      if (S.fall === 1) { S.cy += 150 * dt; if (S.cy >= 112) { S.cy = 112; S.fall = 2; SFX.crit(); S.shake = 10; if (Math.abs(S.hx - 104) <= 13) { S.ko = 1; S.won = 1; } else S.msg = 'MISSED!'; } }
+      if (S.hx >= 134 && !S.ko) S.lost = 'THE STRANGER REACHED MIRA.';
+    },
+    draw(S, g) {
+      rect(0, 128, W, 16, g ? 2 : 1); rect(0, 128, W, 1, 3);
+      rect(56, 14, 66, 4, 3); rect(116, 14, 4, 114, 3); rect(110, 124, 16, 4, 3);                 // crane
+      if (S.fall === 0) rect(104, 18, 1, 6, 3);
+      rect(97, S.cy - 6, 14, 12, 3); rect(99, S.cy - 4, 10, 8, g ? 2 : 1); rect(97, S.cy, 14, 1, 3); // crate
+      const o = S.o; rect(16, 110, 16, 18, 3); rect(18, 113, 12, 13, g ? 2 : 1); rect(14, 108, 20, 3, 3); // can
+      const cx2 = o.cart.x; rect(cx2 - 11, 112, 22, 10, 3); rect(cx2 - 9, 114, 18, 6, g ? 2 : 0); rect(cx2 - 9, 123, 5, 5, 3); rect(cx2 + 4, 123, 5, 5, 3);
+      const ly = o.ladder.y; rect(84, ly - 4, 2, 132 - ly, 3); rect(91, ly - 4, 2, 132 - ly, 3); for (let y = ly; y < 126; y += 8) rect(84, y, 9, 1, 3);
+      person(146, 128, 'M', g); if (S.ko) { rect(S.hx - 8, 122, 16, 6, 3); txt('ZZ', S.hx - 4, 112, 3); } else person(S.hx, 128, 'H', g);
+      if (S.pause > 0) txt('?', S.hx - 1, 100, 3, 2);
+    } },
+  { name: 'CASE 2: THE BAKERY',
+    intro: ['THE TRAIL LEADS TO A BAKERY.', 'A PARCEL SITS ON THE TABLE. IT IS TICKING.', 'OLD BAKER TOMAS NAPS BESIDE IT.', 'WATER WOULD STOP THE FUSE... IF ONLY IT COULD REACH.'],
+    hints: ['SWING THE PAN TO REACH THE SHELF.', 'THE PIPE CAN POUR WATER, BUT THE UMBRELLA BLOCKS IT.', 'TIP THE BOTTLE TO FALL NEAR THE UMBRELLA.', 'CLOSE THE UMBRELLA, RIDE IT UP, THEN OPEN THE PIPE.'],
+    outro: ['WATER POURS DOWN. THE FUSE HISSES AND DIES.', 'TOMAS: HM? IS IT RAINING INDOORS?', 'TWO FATES CHANGED. THE NIGHT IS NOT OVER...'],
+    objs: [ { id: 'clock', name: 'WALL CLOCK', x: 20, y: 40, trick: 'CHIME' }, { id: 'pan', name: 'HANGING PAN', x: 52, y: 52, trick: 'SWING' },
+            { id: 'bottle', name: 'BOTTLE', x: 96, y: 44, trick: 'TIP' }, { id: 'umb', name: 'UMBRELLA', x: 124, y: 86, trick: 'CLOSE' },
+            { id: 'pipe', name: 'WATER PIPE', x: 132, y: 28, trick: 'OPEN' } ],
+    init(S) { S.fuse = 40; S.water = 0; S.closed = 0; S.msg = ''; },
+    trick(S, o) {
+      if (o.id === 'clock') return 'DING! TOMAS SNORES ON.';
+      if (o.id === 'pan') { if (o.done) return 'IT SWINGS GENTLY.'; o.done = 1; o.tx = 66; o.ty = 56; return 'THE PAN SWINGS OUT.'; }
+      if (o.id === 'bottle') { if (o.done) return 'IT LIES ON THE FLOOR.'; o.done = 1; o.tx = 102; o.ty = 108; return 'THE BOTTLE TUMBLES DOWN!'; }
+      if (o.id === 'umb') { if (S.closed) return 'ALREADY CLOSED.'; S.closed = 1; o.ty = 60; return 'THE UMBRELLA SNAPS SHUT AND SPRINGS UP!'; }
+      if (o.id === 'pipe') { if (S.water) return 'WATER IS FLOWING.'; S.water = 1; SFX.heal(); return S.closed ? 'WATER GUSHES OUT!' : 'WATER SPLASHES OFF THE UMBRELLA.'; }
+    },
+    update(S, dt) { S.fuse -= dt; if (S.water && S.closed) { S.wt = (S.wt || 0) + dt; if (S.wt > 0.8) S.won = 1; } else if (S.fuse <= 0) S.lost = 'THE PARCEL WENT OFF.'; },
+    draw(S, g) {
+      rect(0, 128, W, 16, g ? 2 : 1); rect(0, 128, W, 1, 3);
+      const o = S.o;
+      rect(12, 32, 16, 16, 3); rect(14, 34, 12, 12, 0); rect(19, 36, 1, 5, 3); rect(19, 40, 4, 1, 3);                 // clock
+      rect(40, 26, 40, 2, 3); line(52, 28, o.pan.x, o.pan.y - 6); rect(o.pan.x - 7, o.pan.y - 6, 14, 5, 3); rect(o.pan.x + 6, o.pan.y - 4, 8, 1, 3); // pan
+      rect(84, 52, 28, 3, 3); const b = o.bottle; if (b.done && b.y > 100) { rect(b.x - 6, b.y - 3, 12, 6, 3); rect(b.x - 4, b.y - 1, 8, 2, g ? 2 : 1); } else { rect(b.x - 3, b.y - 6, 6, 14, 3); rect(b.x - 1, b.y - 10, 2, 4, 3); }
+      rect(108, 114, 44, 3, 3); rect(112, 117, 3, 11, 3); rect(146, 117, 3, 11, 3);                                    // table
+      rect(124, 104, 14, 10, 3); rect(126, 106, 10, 6, g ? 2 : 1); if (S.fuse > 0 && !S.won) { rect(131, 100, 1, 4, 3); if ((frame >> 2) & 1) rect(130, 98, 3, 3, g ? 0 : 3); }
+      const u = o.umb; if (!S.closed) { for (let i = 0; i < 8; i++) rect(108 + i * 2, 92 - i, 40 - i * 4, 1, 3); rect(127, 92, 1, 12, 3); } else { rect(u.x - 1, u.y - 6, 3, 22, 3); }
+      rect(100, 20, 60, 5, 3); rect(129, 25, 6, 5, 3);                                                                 // pipe
+      if (S.water) { const end = S.closed ? 104 : 84; for (let y = 30; y < end; y += 2) rect(131 + ((y + frame) & 2 ? 0 : 1), y, 1, 2, g ? 0 : 2); if (!S.closed) { txt('*', 122, 80, 2); txt('*', 138, 80, 2); } }
+      person(100, 128, 'T', g); txt('Z', 106, 96 - ((frame >> 4) & 3), 2);
+      txtR('FUSE ' + Math.max(0, Math.ceil(S.fuse)), 156, 4, g ? 0 : 3);
+    } },
+];
+function line(x0, y0, x1, y1) { const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)) | 0; for (let i = 0; i <= n; i++) rect(Math.round(x0 + (x1 - x0) * i / (n || 1)), Math.round(y0 + (y1 - y0) * i / (n || 1)), 1, 1, 3); }
+function person(x, gy, kind, g) {
+  x = Math.round(x); rect(x - 3, gy - 20, 7, 7, 3); rect(x - 2, gy - 19, 5, 5, g ? 2 : 0); rect(x - 4, gy - 13, 9, 9, 3); rect(x - 3, gy - 4, 3, 4, 3); rect(x + 1, gy - 4, 3, 4, 3);
+  if (kind === 'H') { rect(x - 5, gy - 22, 11, 2, 3); rect(x - 3, gy - 25, 7, 3, 3); rect(x + 4, gy - 11, 5, 2, 3); }
+  if (kind === 'M') { rect(x - 4, gy - 21, 9, 2, 3); rect(x - 2, gy - 11, 5, 3, g ? 2 : 1); }
+  if (kind === 'T') { rect(x - 3, gy - 24, 7, 4, 0); rect(x - 3, gy - 24, 7, 1, 3); rect(x - 3, gy - 24, 1, 4, 3); rect(x + 3, gy - 24, 1, 4, 3); }
+}
+const G = { scene: 'title', lv: 0, S: null, at: 0, ghost: false, gx: 0, gy: 0, text: null, tn: 0, queue: [], after: null, hint: 0, flash: 0 };
+window.__g = G;
+function say(lines, after) { G.queue = lines.slice(); G.after = after || null; nextLine(); }
+function nextLine() { if (G.queue.length) { G.text = wrap(G.queue.shift(), 146, 2); G.tn = 0; } else { G.text = null; const a = G.after; G.after = null; if (a) a(); } }
+function startLevel(i, skipIntro) {
+  G.lv = i; const L = LEVELS[i]; const S = { o: {}, objs: L.objs.map((o) => Object.assign({}, o)), t: 0 };
+  S.objs.forEach((o) => { S.o[o.id] = o; }); L.init(S); G.S = S; G.at = 0; G.ghost = false; G.gx = S.objs[0].x; G.gy = S.objs[0].y; G.note = ''; G.noteT = 0; G.hint = 0;
+  G.scene = 'play'; music('enemy');
+  if (!skipIntro) say([L.name].concat(L.intro, ['B: STOP TIME   D-PAD: HOP   A: TRICK']));
+}
+function reachable(from) { const S = G.S; return S.objs.filter((o) => o !== from && Math.hypot(o.x - from.x, o.y - from.y) <= REACH); }
+function note(s) { G.note = s; G.noteT = 150; }
+function onBtn(b) {
+  if (G.text) { if (b === 'a' || b === 'b' || b === 'start') { const full = G.text.join(' ').length; if (G.tn < full) G.tn = 999; else { SFX.move(); nextLine(); } } return; }
+  if (G.scene === 'title') { if (b === 'a' || b === 'start') { SFX.ok(); startLevel(0); } else if (b === 'select') { setPal(palIdx + 1); } return; }
+  if (G.scene === 'end') { if (b === 'a' || b === 'start') { G.scene = 'title'; music('title'); } return; }
+  if (G.scene !== 'play') return;
+  const S = G.S, cur = S.objs[G.at];
+  if (b === 'start') { SFX.back(); startLevel(G.lv, true); note('REWOUND TO THE START.'); return; }
+  if (b === 'select') { const h = LEVELS[G.lv].hints; note('HINT: ' + h[G.hint % h.length]); G.hint++; SFX.ok(); return; }
+  if (b === 'b') { G.ghost = !G.ghost; G.flash = 6; SFX[G.ghost ? 'heal' : 'back'](); music(G.ghost ? 'title' : 'enemy'); return; }
+  if (b === 'a') {
+    if (G.ghost) { note('RETURN TO THE LIVING WORLD (B) TO DO A TRICK.'); SFX.err(); return; }
+    const r = LEVELS[G.lv].trick(S, cur); SFX.ok(); cur.wig = 12; if (r) note(r); return;
+  }
+  const d = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }[b]; if (!d) return;
+  if (!G.ghost) { note('PRESS B TO ENTER THE GHOST WORLD FIRST.'); SFX.err(); return; }
+  let best = null, bs = -1e9;
+  for (const o of reachable(cur)) { const dx = o.x - cur.x, dy = o.y - cur.y, dot = dx * d[0] + dy * d[1]; if (dot <= 2) continue; const sc = dot / Math.hypot(dx, dy) - Math.hypot(dx, dy) / 200; if (sc > bs) { bs = sc; best = o; } }
+  if (best) { G.at = S.objs.indexOf(best); SFX.move(); } else { SFX.err(); note('NO CORE WITHIN REACH THAT WAY.'); }
+}
+function update() {
+  frame++;
+  for (let i = timers.length - 1; i >= 0; i--) if (timers[i].t <= frame) timers.splice(i, 1)[0].r();
+  while (inputQ.length) onBtn(inputQ.shift());
+  if (G.text) { G.tn += 1; return; }
+  if (G.flash > 0) G.flash--;
+  if (G.noteT > 0) G.noteT--;
+  if (G.scene !== 'play') return;
+  const S = G.S, L = LEVELS[G.lv], cur = S.objs[G.at];
+  for (const o of S.objs) { if (o.wig > 0) o.wig--; if (!G.ghost) { if (o.tx !== undefined) o.x += Math.sign(o.tx - o.x) * Math.min(1.5, Math.abs(o.tx - o.x)); if (o.ty !== undefined) o.y += Math.sign(o.ty - o.y) * Math.min(2, Math.abs(o.ty - o.y)); } }
+  G.gx += (cur.x - G.gx) * 0.3; G.gy += (cur.y - G.gy) * 0.3;
+  if (S.shake > 0) S.shake--;
+  if (!G.ghost && !S.won && !S.lost) { S.t += 1 / 60; L.update(S, 1 / 60); }
+  if (S.won && !S.wonT) { S.wonT = 1; SFX.win(); music(null); timers.push({ t: frame + 70, r: () => say(L.outro.concat(['FATE CHANGED!']), () => { if (G.lv + 1 < LEVELS.length) startLevel(G.lv + 1); else { G.scene = 'end'; music('title'); } }) }); }
+  if (S.lost && !S.lostT) { S.lostT = 1; SFX.lose(); music(null); timers.push({ t: frame + 50, r: () => say([S.lost, 'FATE UNCHANGED... BUT A GHOST CAN REWIND TIME.'], () => { startLevel(G.lv, true); note('TRY AGAIN. SELECT GIVES A HINT.'); }) }); }
+}
+function drawText() {
+  box(2, 88, 156, 54); let left = Math.floor(G.tn);
+  G.text.slice(0, 4).forEach((l, i) => { txt(l.slice(0, Math.max(0, left)), 7, 94 + i * 12, 3, 2); left -= l.length + 1; });
+  if ((frame >> 4) & 1) txt('>', 150, 134, 3);
+}
+function draw() {
+  if (G.scene === 'title') {
+    rect(0, 0, W, H, 3);
+    for (let i = 0; i < 40; i++) rect((i * 53 + (frame >> 3) * (1 + i % 3)) % W, (i * 37) % H, 1, 1, i % 2 ? 1 : 2);
+    txtC('PHANTOM', 26, 2, 3); txtC('PHANTOM', 24, 0, 3); txtC('HOUR', 46, 1, 3);
+    const y = 82 + Math.round(Math.sin(frame / 20) * 3); rect(74, y, 12, 12, 0); rect(72, y + 4, 16, 10, 0); rect(77, y + 4, 2, 3, 3); rect(82, y + 4, 2, 3, 3); for (let i = 0; i < 4; i++) rect(72 + i * 4, y + 14, 2, 2, 0);
+    if ((frame >> 4) & 1) txtC('PRESS A', 112, 0); txtC('SELECT: SCREEN COLOR', 130, 1);
+  } else if (G.scene === 'end') {
+    rect(0, 0, W, H, 3); txtC('TWO FATES', 30, 0, 2); txtC('CHANGED', 44, 0, 2); txtC('THE MYSTERY CONTINUES...', 72, 1); txtC('THANK YOU FOR PLAYING', 90, 1); if ((frame >> 4) & 1) txtC('PRESS A', 118, 0);
+  } else {
+    const S = G.S, L = LEVELS[G.lv], g = G.ghost;
+    rect(0, 0, W, H, g ? 3 : 0);
+    cx.save(); if (S.shake > 0) cx.translate(rnd(3) - 1, rnd(3) - 1);
+    if (g) { const o3 = C[3], o0 = C[0]; C = [C[3], C[2], C[1], C[0]]; L.draw(S, true); C = [o0, C[2], C[1], o3]; } else L.draw(S, false);
+    cx.restore();
+    const cur = S.objs[G.at];
+    if (g) {
+      for (const o of S.objs) { const r = o !== cur && Math.hypot(o.x - cur.x, o.y - cur.y) <= REACH; if (r && ((frame >> 2) & 1)) line2(cur.x, cur.y, o.x, o.y); }
+      for (const o of S.objs) { const r = o === cur || Math.hypot(o.x - cur.x, o.y - cur.y) <= REACH; rect(o.x - 3, o.y - 3, 7, 7, 0); rect(o.x - 2, o.y - 2, 5, 5, r ? 3 : 1); if (r) rect(o.x - 1, o.y - 1, 3, 3, ((frame >> 3) & 1) ? 0 : 1); }
+      rect(0, 0, W, 9, 0); txtC('GHOST WORLD - TIME STOPPED', 2, 3);
+    } else { rect(0, 0, 100, 9, 3); txt(L.name, 3, 2, 0); }
+    const bx = Math.round(G.gx), by = Math.round(G.gy) + Math.round(Math.sin(frame / 8) * 2);                       // the ghost flame
+    rect(bx - 2, by - 5, 5, 8, g ? 0 : 3); rect(bx - 1, by - 7, 3, 2, g ? 0 : 3); rect(bx - 1, by - 3, 3, 3, g ? 3 : 0);
+    box(0, 126, W, 18, 0, 3);
+    if (G.noteT > 0) { const ls = wrap(G.note, 150); txt(ls[0], 4, 129, 3); if (ls[1]) txt(ls[1], 4, 136, 3); }
+    else { txt(cur.name, 4, 129, 3); txt(g ? 'D-PAD:HOP  B:RESUME TIME' : 'A:' + cur.trick + '  B:GHOST WORLD', 4, 136, 2); }
+    if (G.flash > 0 && (G.flash & 1)) rect(0, 0, W, H, g ? 0 : 3);
+  }
+  if (G.text) drawText();
+}
+function line2(x0, y0, x1, y1) { const n = Math.hypot(x1 - x0, y1 - y0) | 0; for (let i = 0; i <= n; i += 3) rect(Math.round(x0 + (x1 - x0) * i / n), Math.round(y0 + (y1 - y0) * i / n), 1, 1, 0); }
+function setPal(i) { palIdx = ((i % PALS.length) + PALS.length) % PALS.length; C = PALS[palIdx]; cv.style.background = C[0]; SFX.move(); }
+let last = 0, acc = 0;
+function loop(t) {
+  if (!last) last = t; acc += Math.min(100, t - last); last = t; let n = 0;
+  try { while (acc >= 1000 / 60 && n < 5) { update(); acc -= 1000 / 60; n++; } if (n === 5) acc = 0; draw(); } catch (e) { if (window.console) console.error(e); }
+  requestAnimationFrame(loop);
+}
+window.__tick = (n) => { for (let i = 0; i < n; i++) update(); }; window.__press = (b) => inputQ.push(b);
+fit(); music('title'); requestAnimationFrame(loop);
+})();
+
+</script>
+</body>
+</html>
